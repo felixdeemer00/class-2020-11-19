@@ -36,6 +36,25 @@ week_11_folds <- vfold_cv(week_11_train, v = 5)
 
 * Come up with at least two models that a) you like and would be willing to defend and b) are somewhat different from one another. The two most common model types in these situations are "simple" and "full". The former includes a minimum number of variables. The latter errs on the side of variable inclusion and the creation of interaction terms.
 
+```{r}
+
+model_chosen <- workflow() %>%
+  add_recipe(recipe(primary_06 ~ sex + treatment + age,
+                    data = week_11_train) %>%
+              step_dummy(all_nominal())) %>%
+  add_model(linear_reg() %>%
+              set_engine("stan"))
+
+model_chosen_2 <- workflow() %>%  
+  add_recipe(recipe(primary_06 ~ solo + treatment,
+                    data = week_11_train) %>%
+  step_dummy(all_nominal()) %>%
+  step_interact(~ starts_with("solo"):starts_with("treatment"))) %>%
+  add_model(linear_reg() %>%
+              set_engine("lm"))
+
+```
+
 * Which data set should we use for this? Why?
 
 * What does it mean if, for example, the coefficient of `treatmentNeighbors` varies across models?
@@ -47,6 +66,17 @@ week_11_folds <- vfold_cv(week_11_train, v = 5)
 
 **Prompt:** Compare your two models using cross-validation.
 
+```{r}
+
+metrics_1 <- model_chosen %>%
+  fit_resamples(week_11_folds) %>%
+  collect_metrics()
+
+metrics_2 <- model_chosen_2 %>%
+  fit_resamples(week_11_folds) %>%
+  collect_metrics()
+
+```
 
 ## Scene 3
 
